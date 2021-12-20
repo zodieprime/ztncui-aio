@@ -1,5 +1,5 @@
-FROM debian:sid-slim AS builder
-ENV NODEJS_MAJOR=14
+FROM debian:bullseye-slim AS builder
+ENV NODEJS_MAJOR=16
 
 ARG DEBIAN_FRONTEND=noninteractive
 LABEL MAINTAINER="Key Networks https://key-networks.com"
@@ -10,10 +10,10 @@ ADD VERSION .
 WORKDIR /build
 RUN apt update -y && \
     apt install curl gnupg2 ca-certificates zip unzip build-essential git --no-install-recommends -y && \
-    curl -sL -o node_lts.sh https://deb.nodesource.com/setup_lts.x && \
-    bash node_lts.sh && \
+    curl -sL -o node_inst.sh https://deb.nodesource.com/setup_${NODEJS_MAJOR}.x && \
+    bash node_inst.sh && \
     apt install -y nodejs --no-install-recommends && \
-    rm -f node_lts.sh && \
+    rm -f node_inst.sh && \
     git clone https://github.com/key-networks/ztncui && \
     npm install -g node-gyp pkg && \
     cd ztncui/src && \
@@ -22,10 +22,11 @@ RUN apt update -y && \
     zip -r /build/artifact.zip ztncui node_modules/argon2/build/Release
 
 # BUILD GO UTILS
-FROM golang:buster AS argong
+FROM golang:bullseye AS argong
 WORKDIR /buildsrc
 COPY argon2g /buildsrc/argon2g
 COPY fileserv /buildsrc/fileserv
+ENV CGO_ENABLED=0
 RUN mkdir -p binaries && \
     cd argon2g && \
     go mod download && \
@@ -46,7 +47,7 @@ RUN mkdir -p binaries && \
 
 
 # START RUNNER
-FROM debian:sid-slim AS runner
+FROM debian:bullseye-slim AS runner
 RUN apt update -y && \
     apt install curl gnupg2 ca-certificates unzip supervisor net-tools procps --no-install-recommends -y && \
     groupadd -g 2222 zerotier-one && \
@@ -72,7 +73,7 @@ COPY start_zt1.sh /start_zt1.sh
 COPY start_ztncui.sh /start_ztncui.sh
 COPY supervisord.conf /etc/supervisord.conf
 
-RUN chmod 4755 /bin/gosu && \
+RUN chmod 0755 /bin/gosu && \
     chmod 0755 /usr/local/bin/minica && \
     chmod 0755 /usr/local/bin/argon2g && \
     chmod 0755 /usr/local/bin/gfileserv && \
