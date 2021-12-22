@@ -83,6 +83,7 @@ EXPOSE 3000/tcp
 EXPOSE 3180/tcp
 EXPOSE 8000/tcp
 EXPOSE 3443/tcp
+EXPOSE 9993/udp
 
 WORKDIR /
 VOLUME ["/opt/key-networks/ztncui/etc"]

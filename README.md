@@ -29,15 +29,15 @@ Never use `node_lts.x` as your installation script of nodejs whose version might
 ```bash
 $ git clone https://github.com/key-networks/ztncui-aio # to get a copy of denv file, otherwise make your own
 $ docker pull keynetworks/ztncui
-$ docker run -d -p3443:3443 -p3180:3180 \
+$ docker run -d -p9993:9993/udp -p3443:3443 -p3180:3180 \
     -v /mydata/ztncui:/opt/key-networks/ztncui/etc \
     -v /mydata/zt1:/var/lib/zerotier-one \
-    --env-file ./denv <CHANGE HERE ACCORDING TO NEXT PART> \
+    --env-file ./denv \
     --name ztncui \
     keynetworks/ztncui
 ```
 
-If their one is not updated, try `docker pull ghcr.io/kmahyyg/ztncui-aio:latest` ! (YES, We Love GitHub!)
+See below how to generate the `denv` file.
 
 ## Supported Configuration via persistent storage
 
@@ -46,12 +46,12 @@ For ZTNCUI: https://github.com/key-networks/ztncui
 | REQUIRED | Name | Explanation | Default Value |
 |:--------:|:--------:|:--------:|:--------:|
 | YES | NODE_ENV | https://pugjs.org/api/express.html | production |
-|  no  | HTTPS_HOST | Only Listen on HTTPS_HOST:HTTPS_PORT | NO DEFAULT |
+| no | HTTPS_HOST | Only Listen on HTTPS_HOST:HTTPS_PORT | NO DEFAULT |
 | no | HTTPS_PORT | HTTPS_PORT | 3443 |
 | no | HTTP_PORT | HTTP_PORT | 3000 |
 | no | HTTP_ALL_INTERFACES | Listen on all interfaces, useful for reverse proxy, HTTP only | NO DEFAULT |
 
-This image additional specific:
+Additional environment variables used in this Docker image:
 
 | REQUIRED | Name | Explanation | Default Value |
 |:--------:|:--------:|:--------:|:--------:|
@@ -59,7 +59,15 @@ This image additional specific:
 | no | ZTNCUI_PASSWD | generate admin password on the fly (if not exists) | password |
 | YES | MYADDR | your ip address, public ip address preferred | NO DEFAULT |
 
-Also, this image exposed an http server at port 3180, you could save file in `/mydata/ztncui/myfs/` to serve it. (You could use this to build your own root server and distribute planet file)
+An example `denv` file:
+```bash
+NODE_ENV=production
+HTTPS_PORT=3443
+ZTNCUI_PASSWD=MySecret
+MYDOMAIN=ztncui.docker.test
+```
+
+This image exposes an http server at port 3180, so you could save a file in `/mydata/ztncui/myfs/` to serve it. For example, you could use this to build your own root server and distribute a planet file.
 
 **WARNING: IF YOU DO NOT SET PASSWORD, YOU HAVE TO USE `docker exec -it <CONTAINER NAME> bash`, and then `cat /var/log/docker-ztncui.log` to get your random password. This is gatekeeper.**
 
