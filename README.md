@@ -36,6 +36,18 @@ $ docker run -d -p9993:9993/udp -p3443:3443 -p3180:3180 \
     --name ztncui \
     keynetworks/ztncui
 ```
+## Usage
+
+```bash
+$ git clone https://github.com/key-networks/ztncui-aio # to get a copy of denv file, otherwise make your own
+$ docker pull keynetworks/ztncui
+$ docker run -d -p9993:9993/udp -p3443:3443 -p3180:3180 \
+    -v /mydata/ztncui:/opt/key-networks/ztncui/etc \
+    -v /mydata/zt1:/var/lib/zerotier-one \
+    --env-file ./denv \
+    --name ztncui \
+    keynetworks/ztncui
+```
 
 See below how to generate the `denv` file.
 
